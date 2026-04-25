@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Music Chatroom</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&display=swap"
+            rel="stylesheet"
+        />
+        <script type="importmap">
+            {
+                "imports": {
+                    "vue": "https://cdn.jsdelivr.net/npm/vue@3.5.32/dist/vue.esm-browser.js",
+                    "@graffiti-garden/implementation-decentralized": "https://cdn.jsdelivr.net/npm/@graffiti-garden/implementation-decentralized@0.0.9/dist/browser/index.js",
+                    "@graffiti-garden/wrapper-vue": "https://cdn.jsdelivr.net/npm/@graffiti-garden/wrapper-vue@1.2.2/dist/browser/plugin.mjs"
+                }
+            }
+        </script>
+        <script src="index.js" type="module"></script>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div id="app">Loading...</div>
+        <template id="template">
+            <header>
+                <h1>🎵 Music Chatroom</h1>
+                <button
+                    v-if="!$graffitiSession.value"
+                    type="button"
+                    class="btn btn-ghost"
+                    @click="$graffiti.login()"
+                >
+                    Log In
+                </button>
+                <button
+                    v-else
+                    type="button"
+                    class="btn btn-ghost"
+                    @click="$graffiti.logout($graffitiSession.value)"
+                >
+                    Log Out
+                </button>
+            </header>
+
+            <div v-if="$graffitiSession.value" class="layout-container">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <h2>Chats</h2>
+                    <form
+                        class="new-chat-form"
+                        @submit.prevent="createChat()"
+                    >
+                        <input
+                            type="text"
+                            class="text-input"
+                            v-model="chatTitle"
+                            placeholder="New chat name"
+                        />
+                        <input
+                            type="submit"
+                            class="btn-primary"
+                            :value="isCreatingChat ? 'Creating chat...' : 'Create chat'"
+                            :disabled="!chatTitle || isCreatingChat"
+                        />
+                    </form>
+                    <ul>
+                        <li v-for="chat in chats" :key="chat.url">
+                            <button
+                                type="button"
+                                class="chat-item"
+                                @click="channel = chat.value.channel"
+                                :class="{ active: channel === chat.value.channel }"
+                            >
+                                {{ chat.value.title }}
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Message area -->
+                <div class="message-area">
+                    <div class="message-area-top">
+                        <h2>Messages</h2>
+                    </div>
+
+                    <div
+                        class="message-transcript"
+                        role="log"
+                        aria-live="polite"
+                        aria-relevant="additions"
+                    >
+                        <p v-if="areMessageObjectsLoading" class="transcript-status">
+                            <em>Loading messages...</em>
+                        </p>
+                        <p
+                            v-else-if="sortedMessageObjects.length === 0"
+                            class="transcript-status"
+                        >
+                            No messages yet — say hi and start the thread.
+                        </p>
+                        <ul v-else class="message-list">
+                            <li
+                                v-for="object in sortedMessageObjects"
+                                :key="object.url"
+                                :class="
+                                    object.actor === $graffitiSession.value?.actor
+                                        ? 'self'
+                                        : 'other'
+                                "
+                            >
+                                <div class="msg-meta">
+                                    <strong>
+                                        <graffiti-actor-to-handle
+                                            :actor="object.actor"
+                                        >
+                                        </graffiti-actor-to-handle>
+                                    </strong>
+                                    <button
+                                        v-if="
+                                            object.actor ===
+                                            $graffitiSession.value?.actor
+                                        "
+                                        type="button"
+                                        class="btn-delete"
+                                        @click="deleteMessage(object)"
+                                        :disabled="isDeleting.has(object.url)"
+                                    >
+                                        {{
+                                            isDeleting.has(object.url)
+                                                ? "Deleting..."
+                                                : "Delete"
+                                        }}
+                                    </button>
+                                </div>
+                                <div class="msg-body">
+                                    {{ object.value.content }}
+                                </div>
+                            </li>
+                        </ul>
+                        <div
+                            v-if="!areMessageObjectsLoading"
+                            ref="bottomMarker"
+                            aria-hidden="true"
+                        ></div>
+                    </div>
+
+                    <form class="composer" @submit.prevent="sendMessage()">
+                        <input
+                            type="text"
+                            class="text-input"
+                            v-model="message"
+                            placeholder="Send a message"
+                            aria-label="Message text"
+                        />
+                        <input
+                            type="submit"
+                            class="btn-primary"
+                            :value="isSending ? 'Sending...' : 'Send'"
+                            :disabled="!message || isSending"
+                        />
+                    </form>
+                </div>
+            </div>
+        </template>
+    </body>
+</html>
