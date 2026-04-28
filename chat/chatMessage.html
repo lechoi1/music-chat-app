@@ -1,0 +1,32 @@
+<li :id="msg.url" :class="isMine ? 'self' : 'other'" class="chat-message">
+    <div class="message-content">
+        <div class="msg-meta">
+            <router-link :to="'/profile/' + msg.actor" class="msg-user-link">
+                <strong v-if="profileName">{{ profileName }}</strong>
+                <strong v-else><graffiti-actor-to-handle :actor="msg.actor" /></strong>
+            </router-link>
+            <span class="msg-date">
+                <slot name="context"></slot>
+                {{ new Date(msg.value.published).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+            </span>
+        </div>
+
+        <p class="msg-text">{{ msg.value.content }}</p>
+
+        <div class="msg-footer">
+            <div v-if="msg.value.genres && msg.value.genres.length > 0" class="msg-search-links">
+                <a :href="'https://open.spotify.com/search/' + encodeURIComponent(msg.value.content)" target="_blank">
+                    🎵 Spotify
+                </a>
+                <a :href="'https://www.youtube.com/results?search_query=' + encodeURIComponent(msg.value.content)" target="_blank">
+                    📺 YouTube
+                </a>
+            </div>
+            
+            <button v-if="isMine" @click="deleteMessage" :disabled="isDeleting" class="btn-delete">
+                {{ isDeleting ? '...' : 'Delete' }}
+            </button>
+        </div>
+    </div>
+    
+</li>

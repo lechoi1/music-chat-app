@@ -1,0 +1,40 @@
+<div class="router-area-top">
+    <h2>Search</h2>
+</div>
+<div class="message-transcript">
+    <form class="composer" @submit.prevent="performSearch">
+        <input 
+            type="text"
+            class="text-input"
+            v-model="draft.query"
+            placeholder="Search all messages..."
+            aria-label="Search query"
+        />
+        <select v-model="draft.genre" class="text-input" aria-label="Genre filter">
+            <option value="">All Genres</option>
+            <option v-for="genre in availableGenres" :key="genre" :value="genre">
+                {{ genre }}
+            </option>
+        </select>
+        <button
+            type="submit"
+            class="btn-primary"
+        >
+            Search
+        </button>
+    </form>
+
+    <div class="message-list">
+        <div v-if="(activeSearch.query || activeSearch.genre) && searchResults.length === 0" class="transcript-status">
+            No results found.
+        </div>
+        <ul v-else class="message-list">
+            <chat-message v-for="msg in searchResults" :key="msg.url" :msg="msg">
+                <template #context>
+                    <router-link :to="`/chat/${getChatChannel(msg)}#${msg.url}`">View in Chat</router-link>
+                    • 
+                </template>
+            </chat-message>
+        </ul>
+    </div>
+</div>

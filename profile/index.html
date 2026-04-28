@@ -1,0 +1,32 @@
+<div class="router-area-top">
+    <h2>Profile</h2>
+</div>
+
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-field">
+            <h3>Display Name</h3>
+            <div class="field-value">
+                <div v-if="profileName">{{ profileName }}</div>
+                <graffiti-actor-to-handle v-else :actor="actor"></graffiti-actor-to-handle>
+            </div>
+        </div>
+
+        <div v-if="isMyProfile" class="profile-edit-section">
+            <hr />
+            <form @submit.prevent="updateDisplayName" class="profile-edit-form">
+                <h3>Update Display Name</h3>
+                <input
+                    type="text"
+                    v-model="newDisplayName"
+                    class="text-input"
+                    placeholder="Enter new display name..."
+                    :disabled="isSaving"
+                />
+                <button type="submit" class="btn-primary" :disabled="isSaving || !newDisplayName.trim()">
+                    {{ isSaving ? 'Saving...' : 'Update Name' }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

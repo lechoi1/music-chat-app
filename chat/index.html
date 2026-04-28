@@ -1,0 +1,94 @@
+<div class="router-area-top">
+    <h2>Messages</h2>
+    <button
+        type="button"
+        class="btn"
+        :class="isJoined ? 'btn-leave' : 'btn-join'"
+        @click="toggleJoin"
+        :disabled="isTogglingJoin"
+    >
+        {{ isTogglingJoin ? '...' : (isJoined ? 'Leave Chat' : 'Join Chat') }}
+    </button>
+</div>
+
+<div class="message-transcript">
+
+    <!-- Messages -->
+    <div class="message-list">
+        <div
+            v-if="areMessageObjectsLoading"
+            class="transcript-status"
+        >
+            <em>Loading messages...</em>
+        </div>
+        <div
+            v-else-if="sortedMessageObjects.length === 0"
+            class="transcript-status"
+        >
+            No messages yet — say hi and start the chat.
+        </div>
+        <ul
+            v-else
+            class="message-list"
+        >
+            <chat-message
+                v-for="msg in sortedMessageObjects" 
+                :key="msg.url" 
+                :msg="msg"
+                />
+            <li ref="bottomMarker" style="list-style: none;"></li>
+        </ul>
+    </div>
+
+    <!-- Input text field -->
+    <form class="composer" @submit.prevent="sendMessage()">
+        <input 
+            type="text"
+            class="text-input"
+            v-model="message"
+            placeholder="Send a message or song..."
+            aria-label="Message text"
+            :disabled="isSending"
+        />
+        <button
+            type="button"
+            class="btn-ghost"
+            @click="addCustomGenreField"
+            :disabled="isSending"
+        >
+            + Genre
+        </button>
+        <div class="genre-selection">
+            <label v-for="genre in predefinedGenres" :key="genre" class="genre-tag">
+                <input type="checkbox" :value="genre" v-model="selectedPredefinedGenres" :disabled="isSending">
+                {{ genre }}
+            </label>
+            <div v-for="customGenre in customGenres" :key="customGenre.id" class="genre-tag custom-genre-field">
+                <label>
+                    <input type="checkbox" v-model="customGenre.checked" :disabled="isSending">
+                </label>
+                <input
+                    type="text"
+                    v-model="customGenre.value"
+                    placeholder="Custom genre"
+                    class="text-input genre-input"
+                    :disabled="isSending"
+                >
+                <button
+                    v-if="customGenres.length > 1"
+                    type="button"
+                    class="btn-delete"
+                    @click="removeCustomGenreField(customGenre.id)"
+                    :disabled="isSending"
+                >x</button>
+            </div>
+        </div>
+        <button
+            type="submit"
+            class="btn-primary"
+            :disabled="!message || isSending"
+        >
+            {{ isSending ? 'Sending...' : 'Send' }}
+        </button>
+    </form>
+</div>

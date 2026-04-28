@@ -1,0 +1,26 @@
+<div class="router-area-top">
+    <h2>Explore</h2>
+</div>
+<div class="explore-container">
+    <div v-if="isLoading" class="transcript-status">
+        Searching for music communities...
+    </div>
+
+    <div v-else-if="chats.length === 0" class="transcript-status">
+        No chats found. Be the first to create one in the sidebar!
+    </div>
+
+    <div v-else class="chat-grid">
+        <div
+            v-for="chat in chats"
+            :key="chat.url"
+            class="chat-card"
+            @click="joinAndNavigate(chat)"
+        >
+            <h3>{{ chat.value.title }}</h3>
+            <span class="chat-card-meta">
+                {{ isChatJoined(chat.value.channel) ? 'Already joined' : 'Preview Chat →' }}
+            </span>
+        </div>
+    </div>
+</div>
