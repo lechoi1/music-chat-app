@@ -6,8 +6,9 @@ import {
   normalizeGenre, 
   sortByPublished, 
   getLatestBy, 
-  extractActors, 
-  getMembershipStatusMap 
+  extractActors,
+  getMembershipStatusMap,
+  APP_CHANNEL
 } from "../utils.js";
 
 export default async () => ({
@@ -114,7 +115,7 @@ export default async () => ({
               published: Date.now(), 
               genres: [...new Set(genres)]
             }, 
-            channels: ["designftw-26-music", props.chatId, session.value.actor] 
+            channels: [APP_CHANNEL, props.chatId, session.value.actor] 
           }, 
           session.value,
         );
@@ -127,7 +128,7 @@ export default async () => ({
 
     // Discover chat metadata (name/title) from the main directory
     const { objects: chatMetadataObjects } = useGraffitiDiscover(
-      ["designftw-26-music"],
+      [APP_CHANNEL],
       () => ({
         properties: {
           value: {
@@ -175,7 +176,7 @@ export default async () => ({
           title: newName.trim(),
           published: Date.now()
         },
-        channels: ["designftw-26-music", session.value.actor]
+        channels: [APP_CHANNEL, session.value.actor]
       }, session.value);
     }
 
@@ -248,7 +249,7 @@ export default async () => ({
             status: isJoined.value ? 'left' : 'joined',
             published: Date.now()
           },
-          channels: ["designftw-26-music", props.chatId, session.value.actor]
+          channels: [APP_CHANNEL, props.chatId, session.value.actor]
         }, session.value);
       } finally {
         isTogglingJoin.value = false;

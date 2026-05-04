@@ -2,7 +2,7 @@ import { createApp, defineAsyncComponent, ref, computed } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 import { GraffitiDecentralized } from "@graffiti-garden/implementation-decentralized";
 import { GraffitiPlugin, useGraffiti, useGraffitiSession, useGraffitiDiscover } from "@graffiti-garden/wrapper-vue";
-import { getLatestBy } from "./utils.js";
+import { getLatestBy, APP_CHANNEL } from "./utils.js";
 
 function loadComponent(name) {
   return () => import(`./${name}/main.js`).then((m) => m.default());
@@ -27,7 +27,7 @@ function setup() {
 
   // Discovering chats in the channel
   const { objects: allChats } = useGraffitiDiscover(
-    ["designftw-26-music"],
+    [APP_CHANNEL],
     {
       properties: {
         value: {
@@ -92,7 +92,7 @@ function setup() {
             title: chatTitle.value,
             published: published,
           },
-          channels: ["designftw-26-music", session.value.actor],
+          channels: [APP_CHANNEL, session.value.actor],
         },
         session.value,
       );
@@ -104,7 +104,7 @@ function setup() {
             status: "joined",
             published: published,
           },
-          channels: ["designftw-26-music", session.value.actor, channel],
+          channels: [APP_CHANNEL, session.value.actor, channel],
         },
         session.value,
       );

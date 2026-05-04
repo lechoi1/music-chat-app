@@ -1,6 +1,9 @@
 import { computed } from "vue";
 import { useGraffitiDiscover } from "@graffiti-garden/wrapper-vue";
 
+// The primary channel
+export const APP_CHANNEL = "designftw-26-music2";
+
 // Normalize genres to title case
 export const normalizeGenre = (g) => 
   g.charAt(0).toUpperCase() + g.slice(1).toLowerCase();

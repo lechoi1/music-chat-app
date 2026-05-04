@@ -6,8 +6,9 @@ import {
   sortByPublished, 
   extractActors, 
   getActorToNameMap, 
-  getFriendlyName, 
-  getMembershipStatusMap 
+  getFriendlyName,
+  getMembershipStatusMap,
+  APP_CHANNEL
 } from "../utils.js";
 
 export default async () => ({
@@ -17,7 +18,7 @@ export default async () => ({
 
     // Discover all chats within the application's specific channel
     const { objects: rawChats, isFirstPoll: fetching } = useGraffitiDiscover(
-      () => ["designftw-26-music"],
+      () => [APP_CHANNEL],
       {
         properties: {
           value: {

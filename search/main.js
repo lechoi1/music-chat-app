@@ -1,8 +1,7 @@
 import { ref, computed, defineAsyncComponent, reactive } from "vue";
 import { useGraffitiDiscover } from "@graffiti-garden/wrapper-vue";
 import chatMessage from "../chat/chatMessage.js";
-import { normalizeGenre } from "../utils.js";
-import { getLatestBy } from "../utils.js";
+import { normalizeGenre, getLatestBy, APP_CHANNEL } from "../utils.js";
 
 export default async () => ({
   components: {
@@ -11,7 +10,7 @@ export default async () => ({
   setup() {
     // Discover all chats to get the list of active channels
     const { objects: chatObjects } = useGraffitiDiscover(
-      ["designftw-26-music"],
+      [APP_CHANNEL],
       {
         properties: {
           value: {
