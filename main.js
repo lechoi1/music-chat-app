@@ -92,7 +92,7 @@ function setup() {
             title: chatTitle.value,
             published: published,
           },
-          channels: ["designftw-26-music"],
+          channels: ["designftw-26-music", session.value.actor],
         },
         session.value,
       );
@@ -104,7 +104,7 @@ function setup() {
             status: "joined",
             published: published,
           },
-          channels: [session.value.actor],
+          channels: ["designftw-26-music", session.value.actor, channel],
         },
         session.value,
       );

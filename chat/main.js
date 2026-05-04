@@ -114,7 +114,7 @@ export default async () => ({
               published: Date.now(), 
               genres: [...new Set(genres)]
             }, 
-            channels: [props.chatId] 
+            channels: ["designftw-26-music", props.chatId, session.value.actor] 
           }, 
           session.value,
         );
@@ -175,7 +175,7 @@ export default async () => ({
           title: newName.trim(),
           published: Date.now()
         },
-        channels: ["designftw-26-music"]
+        channels: ["designftw-26-music", session.value.actor]
       }, session.value);
     }
 
@@ -234,6 +234,11 @@ export default async () => ({
 
     const isTogglingJoin = ref(false);
     async function toggleJoin() {
+      if (!session.value) {
+        alert("Please log in to join the chat.");
+        return;
+      }
+
       isTogglingJoin.value = true;
       try {
         await graffiti.post({
@@ -243,7 +248,7 @@ export default async () => ({
             status: isJoined.value ? 'left' : 'joined',
             published: Date.now()
           },
-          channels: [session.value.actor]
+          channels: ["designftw-26-music", props.chatId, session.value.actor]
         }, session.value);
       } finally {
         isTogglingJoin.value = false;
