@@ -2,7 +2,13 @@ import { ref, computed, watch, defineAsyncComponent, nextTick, reactive } from "
 import { useGraffiti, useGraffitiSession, useGraffitiDiscover } from "@graffiti-garden/wrapper-vue";
 import chatMessage from "./chatMessage.js";
 import { useRoute } from "vue-router";
-import { normalizeGenre, sortByPublished } from "../utils.js";
+import { 
+  normalizeGenre, 
+  sortByPublished, 
+  getLatestBy, 
+  extractActors, 
+  getMembershipStatusMap 
+} from "../utils.js";
 
 export default async () => ({
   props: ["chatId"],
@@ -47,27 +53,28 @@ export default async () => ({
     watch([areMessageObjectsLoading, () => route.hash], ([loading, hash]) => {
       if (loading) return;
 
-      nextTick(() => {
-        if (hash) {
-          const messageId = hash.substring(1);
-          const targetElement = document.getElementById(messageId);
-          if (targetElement) {
-            targetElement.scrollIntoView({ block: "start" });
-          }
-        } else {
-          bottomMarker.value?.scrollIntoView({ block: "end" });
+      if (hash) {
+        const messageId = hash.substring(1);
+        const targetElement = document.getElementById(messageId);
+        if (targetElement) {
+          targetElement.scrollIntoView({ block: "start" });
         }
-      });
+      } else {
+        bottomMarker.value?.scrollIntoView({ block: "end" });
+      }
     }, { flush: 'post', immediate: true });
 
+    // Mode toggle
+    const isMusicMode = ref(false);
+
     // Genre
-    const predefinedGenres = ["Pop", "Rock", "Jazz"];
+    const predefinedGenres = ["Pop", "Rock", "Jazz", "R&B", "Hip-hop"];
     const selectedPredefinedGenres = ref([]);
-    const customGenres = reactive([{ id: 0, value: '', checked: true }]);
+    const customGenres = reactive([{ id: 0, value: '', checked: false }]);
     let nextCustomGenreId = 1;
 
     const addCustomGenreField = () => {
-      customGenres.push({ id: nextCustomGenreId++, value: '', checked: true });
+      customGenres.push({ id: nextCustomGenreId++, value: '', checked: false });
     };
 
     const removeCustomGenreField = (id) => {
@@ -79,7 +86,7 @@ export default async () => ({
 
     const resetGenreSelection = () => {
       selectedPredefinedGenres.value = [];
-      customGenres.splice(0, customGenres.length, { id: 0, value: '', checked: true });
+      customGenres.splice(0, customGenres.length, { id: 0, value: '', checked: false });
     };
 
     // Message sending
@@ -87,7 +94,7 @@ export default async () => ({
     const isSending = ref(false);
 
     async function sendMessage() {
-      if (!message.value.trim()) return;
+      if (!message.value.trim() || !isJoined.value) return;
 
       // Prepare genres: Combine, filter, and normalize
       const rawGenres = [
@@ -118,10 +125,64 @@ export default async () => ({
       }
     }
 
+    // Discover chat metadata (name/title) from the main directory
+    const { objects: chatMetadataObjects } = useGraffitiDiscover(
+      ["designftw-26-music"],
+      () => ({
+        properties: {
+          value: {
+            required: ["type", "channel", "title", "published"],
+            properties: {
+              type: { "const": "Chat" },
+              channel: { "const": props.chatId },
+              title: { type: "string" },
+              published: { type: "number" },
+            },
+          },
+        },
+      }),
+      undefined,
+      true
+    );
+
+    const latestChatMetadata = computed(() => {
+      return getLatestBy(chatMetadataObjects.value, (o) => o.value.channel)[props.chatId];
+    });
+
+    const chatName = computed(() => {
+      return latestChatMetadata.value?.value.title;
+    });
+
+    // Sync the browser tab title with the chat name
+    watch(chatName, (newName) => {
+      if (newName) {
+        document.title = `${newName} | Music Chat`;
+      }
+    }, { immediate: true });
+
+    async function editChatName() {
+      const newName = prompt("Enter new chat name:", chatName.value);
+      const targetUrl = latestChatMetadata.value?.url;
+      
+      if (!newName || !newName.trim() || newName.trim() === chatName.value || !targetUrl) return;
+
+      await graffiti.post({
+        value: {
+          activity: "Update",
+          object: targetUrl,
+          type: "Chat",
+          channel: props.chatId,
+          title: newName.trim(),
+          published: Date.now()
+        },
+        channels: ["designftw-26-music"]
+      }, session.value);
+    }
+
     // Membership
     const { objects: myMemberships } = useGraffitiDiscover(
       () => session.value ? [session.value.actor] : [],
-      {
+      () => ({
         properties: {
           value: {
             required: ["type", "chatChannel", "status", "published"],
@@ -133,12 +194,42 @@ export default async () => ({
             },
           },
         },
-      }
+      }),
+      undefined,
+      true
+    );
+
+    // Aggregate all unique actors to warm the profile cache
+    const allActors = computed(() => {
+      return extractActors(
+        session.value?.actor,
+        latestChatMetadata.value,
+        messageObjects.value
+      );
+    });
+
+    // Bulk discover profiles so the child components find them in the cache immediately
+    useGraffitiDiscover(
+      allActors,
+      {
+        properties: {
+          value: {
+            required: ["type", "name", "published"],
+            properties: {
+              type: { const: "Profile" },
+              name: { type: "string" },
+              published: { type: "number" },
+            },
+          },
+        },
+      },
+      undefined,
+      true
     );
 
     const isJoined = computed(() => {
-      const sorted = sortByPublished(myMemberships.value);
-      return sorted.length > 0 && sorted[0].value.status === 'joined';
+      const statusMap = getMembershipStatusMap(myMemberships.value);
+      return statusMap[props.chatId] === 'joined';
     });
 
     const isTogglingJoin = ref(false);
@@ -152,7 +243,7 @@ export default async () => ({
             status: isJoined.value ? 'left' : 'joined',
             published: Date.now()
           },
-          channels: [session.value.actor]
+          channels: [session.value.actor, props.chatId]
         }, session.value);
       } finally {
         isTogglingJoin.value = false;
@@ -160,6 +251,7 @@ export default async () => ({
     }
 
     return {
+      isMusicMode,
       predefinedGenres,
       selectedPredefinedGenres,
       customGenres,
@@ -174,6 +266,8 @@ export default async () => ({
       isJoined,
       toggleJoin,
       isTogglingJoin,
+      chatName,
+      editChatName,
     };
   }
 });

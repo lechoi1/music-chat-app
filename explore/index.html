@@ -2,8 +2,14 @@
     <h2>Explore</h2>
 </div>
 <div class="explore-container">
-    <div v-if="isLoading" class="transcript-status">
-        Searching for music communities...
+    <div v-if="isLoading" class="chat-grid">
+        <div class="searching-container">
+            <div class="music-orbit">
+                <div class="orbit-note">🎵</div>
+                <div class="orbit-note">🎶</div>
+            </div>
+            <div class="searching-text"><em>Searching for music communities...</em></div>
+        </div>
     </div>
 
     <div v-else-if="chats.length === 0" class="transcript-status">
@@ -18,9 +24,19 @@
             @click="joinAndNavigate(chat)"
         >
             <h3>{{ chat.value.title }}</h3>
-            <span class="chat-card-meta">
-                {{ isChatJoined(chat.value.channel) ? 'Already joined' : 'Preview Chat →' }}
-            </span>
+            <div class="chat-card-subtext">
+                👥 {{ chat.value.members?.length || 0 }} members
+            </div>
+            <div v-if="chat.value.messages && chat.value.messages.length > 0" class="chat-card-preview">
+                💬 <div class="preview-sender">{{ chat.value.messages[0].sender }}:</div>
+                {{ chat.value.messages[0].text }}
+            </div>
+            <div v-else class="chat-card-preview">
+                💬 <em>No messages yet</em>
+            </div>
+            <div class="chat-card-meta">
+                {{ isChatJoined(chat.value.channel) ? 'Already joined' : 'View Chat →' }}
+            </div>
         </div>
     </div>
 </div>

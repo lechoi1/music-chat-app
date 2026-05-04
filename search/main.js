@@ -2,6 +2,7 @@ import { ref, computed, defineAsyncComponent, reactive } from "vue";
 import { useGraffitiDiscover } from "@graffiti-garden/wrapper-vue";
 import chatMessage from "../chat/chatMessage.js";
 import { normalizeGenre } from "../utils.js";
+import { getLatestBy } from "../utils.js";
 
 export default async () => ({
   components: {
@@ -14,9 +15,8 @@ export default async () => ({
       {
         properties: {
           value: {
-            required: ["activity", "type", "channel", "title", "published"],
+            required: ["type", "channel", "title", "published"],
             properties: {
-              activity: { "const" : "Create" },
               type: { "const" : "Chat" },
               channel: { type: "string" },
               title: { type: "string" },
@@ -28,9 +28,10 @@ export default async () => ({
       undefined
     );
 
-    const chatChannels = computed(() => 
-      chatObjects.value.map(chat => chat.value.channel)
-    );
+    const chatChannels = computed(() => {
+      return Object.values(getLatestBy(chatObjects.value, (c) => c.value.channel))
+        .map(chat => chat.value.channel);
+    });
 
     // Discover all messages in those channels
     const { objects: allMessages } = useGraffitiDiscover(

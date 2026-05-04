@@ -7,9 +7,21 @@ export const normalizeGenre = (g) =>
 
 // Sort Graffiti objects by their timestamp
 export const sortByPublished = (objects, descending = true) => {
-  return objects.toSorted((a, b) => 
+  return [...objects].sort((a, b) => 
     descending ? b.value.published - a.value.published : a.value.published - b.value.published
   );
+};
+
+// Helper to group objects by a key and return the most recent one for each group
+export const getLatestBy = (objects, keySelector) => {
+  const map = {};
+  for (const obj of objects) {
+    const key = keySelector(obj);
+    if (!map[key] || obj.value.published > map[key].value.published) {
+      map[key] = obj;
+    }
+  }
+  return map;
 };
 
 // Composable to fetch and track the latest display name for a given actor
@@ -41,4 +53,44 @@ export function useProfile(actorGetter) {
   });
 
   return { profileName };
+}
+
+// Extract unique actor IDs from a variety of Graffiti sources (strings, objects, or arrays).
+export function extractActors(...args) {
+  const actors = new Set();
+  const process = (item) => {
+    if (!item) return;
+    if (typeof item === 'string') {
+      actors.add(item);
+    } else if (Array.isArray(item)) {
+      item.forEach(process);
+    } else if (item.actor) {
+      actors.add(item.actor);
+    }
+  };
+  args.forEach(process);
+  return [...actors];
+}
+
+// Maps channel IDs to the user's latest membership status from a list of membership objects
+export function getMembershipStatusMap(membershipObjects) {
+  const latest = getLatestBy(membershipObjects, (m) => m.value.chatChannel);
+  return Object.fromEntries(
+    Object.entries(latest).map(([channel, m]) => [channel, m.value.status])
+  );
+}
+
+// Creates a map from actor ID to name from a list of profile objects
+export function getActorToNameMap(profileObjects) {
+  const latestProfiles = getLatestBy(profileObjects, (p) => p.actor);
+  return Object.fromEntries(
+    Object.entries(latestProfiles).map(([actor, p]) => [actor, p.value.name]),
+  );
+}
+
+// Returns a profile name for an actor, falling back to a truncated actor ID or "Unknown"
+export function getFriendlyName(actor, nameMap) {
+  if (nameMap && nameMap[actor]) return nameMap[actor];
+  if (!actor) return "Unknown";
+  return actor.split(":").pop().substring(0, 8);
 }

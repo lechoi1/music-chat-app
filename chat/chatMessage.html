@@ -13,6 +13,12 @@
 
         <p class="msg-text">{{ msg.value.content }}</p>
 
+        <div v-if="msg.value.genres && msg.value.genres.length > 0" class="msg-genres">
+            <span v-for="genre in msg.value.genres" :key="genre" class="genre-item">
+                {{ genre }}
+            </span>
+        </div>
+
         <div class="msg-footer">
             <div v-if="msg.value.genres && msg.value.genres.length > 0" class="msg-search-links">
                 <a :href="'https://open.spotify.com/search/' + encodeURIComponent(msg.value.content)" target="_blank">

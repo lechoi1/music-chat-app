@@ -2,6 +2,7 @@ import { createApp, defineAsyncComponent, ref, computed } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 import { GraffitiDecentralized } from "@graffiti-garden/implementation-decentralized";
 import { GraffitiPlugin, useGraffiti, useGraffitiSession, useGraffitiDiscover } from "@graffiti-garden/wrapper-vue";
+import { getLatestBy } from "./utils.js";
 
 function loadComponent(name) {
   return () => import(`./${name}/main.js`).then((m) => m.default());
@@ -30,9 +31,8 @@ function setup() {
     {
       properties: {
         value: {
-          required: ["activity", "type", "channel", "title", "published"],
+          required: ["type", "channel", "title", "published"],
           properties: {
-            activity: { "const" : "Create" },
             type: { "const" : "Chat" },
             channel: { type : "string" },
             title: { type : "string" },
@@ -42,7 +42,7 @@ function setup() {
       }
     },
     undefined,
-    true
+    false
   )
 
   // Discovering user's chat memberships
@@ -66,15 +66,11 @@ function setup() {
   )
 
   const chats = computed(() => {
-    const statusMap = {};
-    for (const m of memberships.value) {
-      const channel = m.value.chatChannel;
-      if (!statusMap[channel] || m.value.published > statusMap[channel].published) {
-        statusMap[channel] = m.value;
-      }
-    }
-    return allChats.value.filter(chat => 
-      statusMap[chat.value.channel]?.status === "joined"
+    const chatMap = getLatestBy(allChats.value, (c) => c.value.channel);
+    const statusMap = getLatestBy(memberships.value, (m) => m.value.chatChannel);
+
+    return Object.values(chatMap).filter(chat => 
+      statusMap[chat.value.channel]?.value.status === "joined"
     );
   })
 
@@ -108,7 +104,7 @@ function setup() {
             status: "joined",
             published: published,
           },
-          channels: [session.value.actor],
+          channels: [session.value.actor, channel],
         },
         session.value,
       );
