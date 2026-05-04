@@ -104,7 +104,7 @@ function setup() {
             status: "joined",
             published: published,
           },
-          channels: [session.value.actor, channel],
+          channels: [session.value.actor],
         },
         session.value,
       );

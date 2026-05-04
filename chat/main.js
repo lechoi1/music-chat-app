@@ -243,7 +243,7 @@ export default async () => ({
             status: isJoined.value ? 'left' : 'joined',
             published: Date.now()
           },
-          channels: [session.value.actor, props.chatId]
+          channels: [session.value.actor]
         }, session.value);
       } finally {
         isTogglingJoin.value = false;
