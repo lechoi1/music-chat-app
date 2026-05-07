@@ -1,6 +1,6 @@
 import { ref, computed } from "vue";
 import { useGraffiti, useGraffitiSession } from "@graffiti-garden/wrapper-vue";
-import { useProfile } from "../utils.js";
+import { useProfile, APP_CHANNEL } from "../utils.js";
 
 export default async () => ({
   props: ["actor"],
@@ -28,7 +28,7 @@ export default async () => ({
             name: newDisplayName.value.trim(),
             published: Date.now()
           },
-          channels: [session.value.actor]
+          channels: [APP_CHANNEL, session.value.actor]
         }, session.value);
         newDisplayName.value = "";
       } finally {
@@ -37,6 +37,7 @@ export default async () => ({
     }
 
     return {
+      actor: props.actor,
       profileName,
       isMyProfile,
       newDisplayName,
