@@ -24,6 +24,9 @@ function setup() {
   // Initialize Graffiti
   const graffiti = useGraffiti();
   const session = useGraffitiSession();
+  const isCreatingChatModalOpen = ref(false);
+  const isMenuOpen = ref(false);
+  const isSidebarOpen = ref(true);
 
   // Discovering chats in the channel
   const { objects: allChats } = useGraffitiDiscover(
@@ -109,6 +112,7 @@ function setup() {
         session.value,
       );
       chatTitle.value = "";
+      isCreatingChatModalOpen.value = false;
     } finally {
       isCreatingChat.value = false;
     }
@@ -119,6 +123,9 @@ function setup() {
     chatTitle,
     isCreatingChat,
     createChat,
+    isCreatingChatModalOpen,
+    isMenuOpen,
+    isSidebarOpen,
   };
 }
 

@@ -82,9 +82,32 @@
             >
                 + Genre
             </button>
+            <button
+                type="button"
+                class="btn-ghost genre-add-button"
+                @click="isGenreModalOpen = true"
+                :disabled="isSending"
+            >
+                See all genres
+            </button>
             <div class="genre-scroll-area">
+                <template v-if="lastCustomGenre">
+                    <span class="genre-last-heading">Your last used custom genre:</span>
+                    <label class="genre-tag">
+                        <input type="checkbox" :value="lastCustomGenre" v-model="selectedFromModal" :disabled="isSending">
+                        {{ lastCustomGenre }}
+                    </label>
+                </template>
+
+                <div class="genre-divider"></div>
+
                 <label v-for="genre in predefinedGenres" :key="genre" class="genre-tag">
-                    <input type="checkbox" :value="genre" v-model="selectedPredefinedGenres" :disabled="isSending">
+                    <input type="checkbox" :value="genre" v-model="selectedFromModal" :disabled="isSending">
+                    {{ genre }}
+                </label>
+
+                <label v-for="genre in selectedCommunityGenres" :key="genre" class="genre-tag">
+                    <input type="checkbox" :value="genre" v-model="selectedFromModal" :disabled="isSending">
                     {{ genre }}
                 </label>
                 <div v-for="customGenre in customGenres" :key="customGenre.id" class="genre-tag custom-genre-field">
@@ -112,7 +135,7 @@
         <button
             type="submit"
             class="btn-primary"
-            :disabled="isSending || !message || (isMusicMode && selectedPredefinedGenres.length === 0 && !customGenres.some(g => g.checked))"
+            :disabled="isSending || !message || (isMusicMode && selectedFromModal.length === 0 && !customGenres.some(g => g.checked))"
         >
             {{ isSending ? 'Sending...' : 'Send' }}
         </button>
@@ -120,5 +143,24 @@
 
     <div v-else class="composer-placeholder">
         <em>Join the chat to start messaging</em>
+    </div>
+
+    <!-- Genre Modal -->
+    <div v-if="isGenreModalOpen" class="modal-overlay" @click.self="isGenreModalOpen = false">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>All Genres</h3>
+                <button type="button" class="btn-icon" @click="isGenreModalOpen = false">&times;</button>
+            </div>
+            <div class="genre-modal-list">
+                <label v-for="genre in allExistingGenres" :key="genre" class="genre-tag">
+                    <input type="checkbox" :value="genre" v-model="selectedFromModal">
+                    {{ genre }}
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-primary" @click="isGenreModalOpen = false">Done</button>
+            </div>
+        </div>
     </div>
 </div>

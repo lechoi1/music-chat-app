@@ -12,7 +12,6 @@
     /* Borders */
     --border-style: 0.08rem solid var(--border);
     --border-style-transparent: 0.08rem solid transparent;
-    --border-style-danger: 0.08rem solid var(--danger);
     --outline-style: 0.2rem solid;
 }
 
@@ -74,6 +73,7 @@ h2 {
 header {
     padding: 0.875rem 1.25rem;
     background: var(--brand-light);
+    position: relative;
     color: var(--white);
     display: flex;
     justify-content: space-between;
@@ -85,6 +85,17 @@ header {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+}
+
+.menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--white);
+    font-size: 1.75rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
 }
 
 .home-link {
@@ -104,8 +115,28 @@ header {
     flex-shrink: 0;
 }
 
-.sidebar h2 {
+.sidebar-header {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
     margin-bottom: 0.75rem;
+}
+
+.sidebar h2 {
+    margin-bottom: 0;
+}
+
+.sidebar-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    user-select: none;
+}
+
+.sidebar-toggle-icon {
+    font-size: 0.6rem;
+    display: none;
 }
 
 /* Common Components */
@@ -230,7 +261,6 @@ header {
 
 .btn-delete:hover:not(:disabled) {
     color: var(--danger);
-    background: rgba(239, 68, 68, 0.1);
     opacity: 1;
     background: var(--white);
 }
@@ -452,13 +482,6 @@ header {
     background: rgba(255, 255, 255, 0.25);
 }
 
-.message-content small {
-    display: block;
-    font-size: 0.7rem;
-    opacity: 0.6;
-    margin-top: 0.25rem;
-}
-
 /* Composer & Forms */
 .composer {
     display: flex;
@@ -551,6 +574,25 @@ header {
 }
 .genre-add-button:hover:not(:disabled) {
     background: rgba(0, 0, 0, 0.08);
+}
+
+.genre-last-heading {
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-right: 8px;
+    align-self: center;
+    white-space: nowrap;
+    opacity: 0.8;
+}
+
+.genre-divider {
+    width: 1px;
+    height: 1.5rem;
+    background-color: currentColor;
+    opacity: 0.2;
+    margin: 0 12px;
+    align-self: center;
+    flex-shrink: 0;
 }
 
 .genre-tag {
@@ -715,6 +757,23 @@ header {
         border-bottom: var(--border-style);
     }
 
+    .sidebar-title {
+        cursor: pointer;
+    }
+
+    .sidebar-toggle-icon {
+        display: inline-block;
+    }
+
+    .sidebar.collapsed {
+        max-height: fit-content;
+        padding-bottom: 0.5rem;
+    }
+
+    .sidebar.collapsed .sidebar-header {
+        margin-bottom: 0;
+    }
+
     .new-chat-form {
         flex-direction: row;
         flex-wrap: wrap;
@@ -733,6 +792,70 @@ header {
     header h1 {
         font-size: 1.05rem;
     }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .header-actions {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--brand-light);
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0.75rem;
+        border-bottom: var(--border-style);
+        z-index: 100;
+    }
+
+    .header-actions.menu-open {
+        display: flex;
+    }
+
+    .header-actions .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.modal {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.modal-header h3 { margin: 0; }
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
 }
 
 /* Login page animation */
@@ -749,11 +872,51 @@ header {
 .prompt-content {
     text-align: center;
     animation: fadeIn 1s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+/* Adjustments for the login prompt */
+.login-prompt .prompt-content {
+    gap: 1rem;
+}
+
+.login-prompt .prompt-content h2 {
+    font-size: 1.2rem;
 }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(2rem); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Login Button & Notes Styling */
+.login-action-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.login-action-wrapper .note {
+    position: static;
+    font-size: 2.5rem;
+    opacity: 0.8;
+    transition: transform 0.3s ease;
+}
+
+.login-action-wrapper .btn-primary {
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.login-action-wrapper .btn-primary:hover {
+    box-shadow: 0 0 20px var(--accent);
+}
+
+.login-action-wrapper:has(.btn-primary:hover) .note {
+    animation: note-hover 3s infinite ease-in-out;
 }
 
 .music-notes {
@@ -768,48 +931,16 @@ header {
 
 .note {
     position: absolute;
+    top: 65%;
     font-size: 2rem;
-    opacity: 0;
-    animation: note-flow 6s infinite linear;
+    opacity: 0.6;
+    scale: 0.6;
 }
 
-@keyframes note-flow {
-    0% {
-        top: 35%;
-        left: 62%;
-        transform: rotate(-10deg) scale(0.4);
-        opacity: 0;
-    }
-    20% {
-        top: 18%;
-        left: 68%;
-        transform: rotate(-5deg) scale(0.5);
-        opacity: 0.7;
-    }
-    50% {
-        top: 8%;
-        left: 78%;
-        transform: rotate(0deg) scale(0.65);
-        opacity: 0.7;
-    }
-    80% {
-        top: 5%;
-        left: 87%;
-        transform: rotate(5deg) scale(0.75);
-        opacity: 0.7;
-    }
-    100% {
-        top: 2rem;
-        left: 90%;
-        transform: rotate(10deg) scale(0.8);
-        opacity: 0;
-    }
+@keyframes note-hover {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-1rem) scale(1.1); }
 }
-
-.note:nth-child(1) { animation-delay: 0s; }
-.note:nth-child(2) { animation-delay: 1s; }
-.note:nth-child(3) { animation-delay: 2s; }
-.note:nth-child(4) { animation-delay: 3s; }
 
 /* Explore page animation */
 .searching-container {
@@ -917,4 +1048,13 @@ input:checked + .slider {
 
 input:checked + .slider:before {
     transform: translateX(1rem);
+}
+
+.genre-modal-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 1rem 0;
 }

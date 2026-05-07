@@ -97,3 +97,15 @@ export function getFriendlyName(actor, nameMap) {
   if (!actor) return "Unknown";
   return actor.split(":").pop().substring(0, 8);
 }
+
+
+// Extracts unique, normalized, and alphabetically sorted genres from a list of messages
+export const getUniqueGenres = (messages, extraGenres = []) => {
+  const genres = new Set(extraGenres.map(normalizeGenre));
+  messages.forEach(msg => {
+    if (msg.value?.genres) {
+      msg.value.genres.forEach(g => genres.add(normalizeGenre(g)));
+    }
+  });
+  return Array.from(genres).sort();
+};

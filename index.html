@@ -22,50 +22,42 @@
         <template id="template">
             <header>
                 <h1><router-link to="/" class="home-link">🎵 Music Chatroom</router-link></h1>
-                <div class="header-actions">
-                    <template v-if="$graffitiSession.value">
-                        <router-link to="/explore" class="btn btn-ghost">Explore</router-link>
-                        <router-link to="/search" class="btn btn-ghost">Search</router-link>
-                        <router-link
-                            :to="'/profile/' + $graffitiSession.value.actor"
-                            class="btn btn-ghost"
-                        >
-                            Profile
-                        </router-link>
-                        <button
-                            type="button"
-                            class="btn btn-ghost"
-                            @click="$graffiti.logout($graffitiSession.value)"
-                        >
-                            Log Out
-                        </button>
-                    </template>
-                    <button v-else type="button" class="btn btn-ghost" @click="$graffiti.login()">
-                        Log In
+                <div v-if="$graffitiSession.value" class="header-actions" :class="{ 'menu-open': isMenuOpen }" @click="isMenuOpen = false">
+                    <router-link to="/explore" class="btn btn-ghost">Explore</router-link>
+                    <router-link to="/search" class="btn btn-ghost">Search</router-link>
+                    <router-link
+                        :to="'/profile/' + $graffitiSession.value.actor"
+                        class="btn btn-ghost"
+                    >
+                        Profile
+                    </router-link>
+                    <button
+                        type="button"
+                        class="btn btn-ghost"
+                        @click="$graffiti.logout($graffitiSession.value)"
+                    >
+                        Log Out
                     </button>
                 </div>
+                <button v-if="$graffitiSession.value" class="menu-toggle" @click="isMenuOpen = !isMenuOpen">
+                    &#9776;
+                </button>
             </header>
 
             <main>
                 <div v-if="$graffitiSession.value" class="layout-container">
                     <!-- Sidebar (always shown)-->
-                    <div class="sidebar">
-                        <h2>Chats</h2>
-                        <form class="new-chat-form" @submit.prevent="createChat()">
-                            <input
-                                type="text"
-                                class="text-input"
-                                v-model="chatTitle"
-                                placeholder="New chat name"
-                            />
-                            <input
-                                type="submit"
-                                class="btn-primary"
-                                :value="isCreatingChat ? 'Creating chat...' : 'Create chat'"
-                                :disabled="!chatTitle || isCreatingChat"
-                            />
-                        </form>
-                        <ul>
+                    <div class="sidebar" :class="{ 'collapsed': !isSidebarOpen }">
+                        <div class="sidebar-header">
+                            <h2 @click="isSidebarOpen = !isSidebarOpen" class="sidebar-title">
+                                <span class="sidebar-toggle-icon">{{ isSidebarOpen ? '▼' : '▶' }}</span>
+                                Chats
+                            </h2>
+                            <button v-if="isSidebarOpen" type="button" class="btn-icon" @click="isCreatingChatModalOpen = true" title="Create New Chat" style="font-size: 1.5rem;">
+                                +
+                            </button>
+                        </div>
+                        <ul v-show="isSidebarOpen">
                             <li v-for="chat in chats" :key="chat.url">
                                 <router-link
                                     :to="`/chat/${chat.value.channel}`"
@@ -82,6 +74,33 @@
                     <div class="router-area">
                         <router-view></router-view>
                     </div>
+
+                    <!-- Create Chat Modal -->
+                    <div v-if="isCreatingChatModalOpen" class="modal-overlay" @click.self="isCreatingChatModalOpen = false">
+                        <div class="modal">
+                            <div class="modal-header">
+                                <h3>Create New Chat</h3>
+                                <button type="button" class="btn-icon" @click="isCreatingChatModalOpen = false">&times;</button>
+                            </div>
+                            <form class="new-chat-form" @submit.prevent="createChat()">
+                                <input
+                                    type="text"
+                                    class="text-input"
+                                    v-model="chatTitle"
+                                    placeholder="Enter chat name..."
+                                />
+                                <div class="modal-actions">
+                                    <button type="button" class="btn-ghost" @click="isCreatingChatModalOpen = false">Cancel</button>
+                                    <input
+                                        type="submit"
+                                        class="btn-primary"
+                                        :value="isCreatingChat ? 'Creating...' : 'Create Chat'"
+                                        :disabled="!chatTitle || isCreatingChat"
+                                    />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Login prompt -->
@@ -89,12 +108,13 @@
                     <div class="prompt-content">
                         <h2>Welcome to 🎵 Music Chatroom</h2>
                         <p>Log in to join the conversation and share your favorite tunes!</p>
-                    </div>
-                    <div class="music-notes">
-                        <div class="note">🎵</div>
-                        <div class="note">🎶</div>
-                        <div class="note">🎼</div>
-                        <div class="note">🎵</div>
+                        <div class="login-action-wrapper">
+                            <span class="note">🎵</span>
+                            <button type="button" class="btn-primary" @click="$graffiti.login()">
+                                Log In
+                            </button>
+                            <span class="note">🎶</span>
+                        </div>
                     </div>
                 </div>
 

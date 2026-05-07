@@ -8,6 +8,7 @@ import {
   getLatestBy, 
   extractActors,
   getMembershipStatusMap,
+  getUniqueGenres,
   APP_CHANNEL
 } from "../utils.js";
 
@@ -70,9 +71,98 @@ export default async () => ({
 
     // Genre
     const predefinedGenres = ["Pop", "Rock", "Jazz", "R&B", "Hip-hop"];
-    const selectedPredefinedGenres = ref([]);
+    const selectedFromModal = ref([]);
+    const isGenreModalOpen = ref(false);
     const customGenres = reactive([{ id: 0, value: '', checked: false }]);
     let nextCustomGenreId = 1;
+
+    // Discover all chats to get the list of active channels (for global genre aggregation)
+    const { objects: chatMetadataObjects } = useGraffitiDiscover(
+      [APP_CHANNEL],
+      () => ({
+        properties: {
+          value: {
+            required: ["type", "channel", "title", "published"],
+            properties: {
+              type: { "const": "Chat" },
+              channel: { type: "string" },
+              title: { type: "string" },
+              published: { type: "number" },
+            },
+          },
+        },
+      }),
+      undefined,
+      true
+    );
+
+    const latestChatMetadata = computed(() => {
+      return getLatestBy(chatMetadataObjects.value, (o) => o.value.channel)[props.chatId];
+    });
+
+    const allAppChannels = computed(() => {
+      return [...new Set(chatMetadataObjects.value.map(c => c.value.channel))];
+    });
+
+    // Discover messages across all channels to aggregate community-wide genres (same as Search page)
+    const { objects: allAppMessages } = useGraffitiDiscover(
+      allAppChannels,
+      {
+        properties: {
+          value: {
+            required: ["published"],
+            properties: {
+              genres: { type: "array", items: { type: "string" } },
+              published: { type: "number" },
+            },
+          },
+        },
+      },
+      undefined,
+      true
+    );
+
+    // Discover user's own messages to find the last custom genre
+    const { objects: myMessages } = useGraffitiDiscover(
+      () => session.value ? [session.value.actor] : [],
+      {
+        properties: {
+          value: {
+            required: ["content", "published"],
+            properties: {
+              content: { type: "string" },
+              published: { type: "number" },
+              genres: { type: "array", items: { type: "string" } },
+            },
+          },
+        },
+      },
+      undefined,
+      false
+    );
+
+    const lastCustomGenre = computed(() => {
+      const sorted = sortByPublished(myMessages.value, true);
+      for (const msg of sorted) {
+        if (msg.value.genres && msg.value.genres.length > 0) {
+          const custom = msg.value.genres.find(g => 
+            !predefinedGenres.includes(normalizeGenre(g))
+          );
+          if (custom) return normalizeGenre(custom);
+        }
+      }
+      return null;
+    });
+
+    const selectedCommunityGenres = computed(() => {
+      return selectedFromModal.value.filter(g => 
+        !predefinedGenres.includes(g) && g !== lastCustomGenre.value
+      );
+    });
+
+    const allExistingGenres = computed(() => {
+      return getUniqueGenres(allAppMessages.value, predefinedGenres);
+    });
 
     const addCustomGenreField = () => {
       customGenres.push({ id: nextCustomGenreId++, value: '', checked: false });
@@ -86,7 +176,7 @@ export default async () => ({
     };
 
     const resetGenreSelection = () => {
-      selectedPredefinedGenres.value = [];
+      selectedFromModal.value = [];
       customGenres.splice(0, customGenres.length, { id: 0, value: '', checked: false });
     };
 
@@ -99,7 +189,7 @@ export default async () => ({
 
       // Prepare genres: Combine, filter, and normalize
       const rawGenres = [
-        ...selectedPredefinedGenres.value,
+        ...selectedFromModal.value,
         ...customGenres.filter(g => g.checked && g.value.trim()).map(g => g.value.trim())
       ];
       const genres = rawGenres
@@ -125,30 +215,6 @@ export default async () => ({
         isSending.value = false;
       }
     }
-
-    // Discover chat metadata (name/title) from the main directory
-    const { objects: chatMetadataObjects } = useGraffitiDiscover(
-      [APP_CHANNEL],
-      () => ({
-        properties: {
-          value: {
-            required: ["type", "channel", "title", "published"],
-            properties: {
-              type: { "const": "Chat" },
-              channel: { "const": props.chatId },
-              title: { type: "string" },
-              published: { type: "number" },
-            },
-          },
-        },
-      }),
-      undefined,
-      true
-    );
-
-    const latestChatMetadata = computed(() => {
-      return getLatestBy(chatMetadataObjects.value, (o) => o.value.channel)[props.chatId];
-    });
 
     const chatName = computed(() => {
       return latestChatMetadata.value?.value.title;
@@ -259,7 +325,11 @@ export default async () => ({
     return {
       isMusicMode,
       predefinedGenres,
-      selectedPredefinedGenres,
+      lastCustomGenre,
+      selectedFromModal,
+      selectedCommunityGenres,
+      isGenreModalOpen,
+      allExistingGenres,
       customGenres,
       addCustomGenreField,
       removeCustomGenreField,

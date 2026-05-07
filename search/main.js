@@ -1,7 +1,12 @@
 import { ref, computed, defineAsyncComponent, reactive } from "vue";
 import { useGraffitiDiscover } from "@graffiti-garden/wrapper-vue";
 import chatMessage from "../chat/chatMessage.js";
-import { normalizeGenre, getLatestBy, APP_CHANNEL } from "../utils.js";
+import { 
+  normalizeGenre, 
+  getLatestBy, 
+  getUniqueGenres, 
+  APP_CHANNEL 
+} from "../utils.js";
 
 export default async () => ({
   components: {
@@ -61,10 +66,7 @@ export default async () => ({
 
     // Extract all unique genres from all messages for the dropdown
     const availableGenres = computed(() => {
-      const allMessageGenres = allMessages.value.flatMap(msg => msg.value.genres || []);
-      return Array.from(new Set(
-        allMessageGenres.map(normalizeGenre)
-      )).sort();
+      return getUniqueGenres(allMessages.value);
     });
 
     const searchResults = computed(() => {
@@ -84,7 +86,11 @@ export default async () => ({
     };
     const getChatChannel = (msg) => msg.channels.find(c => chatChannels.value.includes(c));
 
-    return { draft, activeSearch, availableGenres, searchResults, performSearch, getChatChannel };
+    const isStale = computed(() => {
+      return draft.query !== activeSearch.query || draft.genre !== activeSearch.genre;
+    });
+
+    return { draft, activeSearch, availableGenres, searchResults, performSearch, getChatChannel, isStale };
   },
   template: await fetch(new URL("./index.html", import.meta.url)).then((r) =>
     r.text(),
