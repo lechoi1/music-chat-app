@@ -47,9 +47,9 @@ export default async () => ({
       {
         properties: {
           value: {
-            required: ["published"],
+            required: ["content", "published"],
             properties: {
-              content: { type: "string" }, // Content is optional to catch all historical objects
+              content: { type: "string" },
               published: { type: "number" },
             },
           },
