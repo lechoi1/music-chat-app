@@ -1,7 +1,7 @@
 import { ref, computed, watch, defineAsyncComponent, nextTick, reactive } from "vue";
 import { useGraffiti, useGraffitiSession, useGraffitiDiscover } from "@graffiti-garden/wrapper-vue";
 import chatMessage from "./chatMessage.js";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { 
   normalizeGenre, 
   sortByPublished, 
@@ -23,6 +23,7 @@ export default async () => ({
   setup(props) {
     const graffiti = useGraffiti();
     const route = useRoute();
+    const router = useRouter();
     const session = useGraffitiSession();
 
     // Discovering messages specifically for this chatId
@@ -334,6 +335,53 @@ export default async () => ({
       }
     }
 
+    // Discover all memberships for this chat to check if creator is alone
+    const { objects: allChatMemberships } = useGraffitiDiscover(
+      () => [props.chatId],
+      () => ({
+        properties: {
+          value: {
+            required: ["type", "chatChannel", "status", "published"],
+            properties: {
+              type: { "const": "Membership" },
+              chatChannel: { "const": props.chatId },
+              status: { type: "string" },
+              published: { type: "number" },
+            },
+          },
+        },
+      }),
+      undefined,
+      true
+    );
+
+    const memberCount = computed(() => {
+      const latest = getLatestBy(allChatMemberships.value, m => m.actor);
+      return Object.values(latest).filter(m => m.value.status === 'joined').length;
+    });
+
+    const isCreator = computed(() => {
+      const createObj = chatMetadataObjects.value.find(o => 
+        o.value.channel === props.chatId && o.value.activity === 'Create'
+      );
+      return session.value && createObj && session.value.actor === createObj.actor;
+    });
+
+    const canDelete = computed(() => {
+      return isCreator.value && (memberCount.value === 0 || (memberCount.value === 1 && isJoined.value));
+    });
+
+    const isDeleteModalOpen = ref(false);
+
+    async function deleteChat() {
+      const myMetadata = chatMetadataObjects.value.filter(o => 
+        o.value.channel === props.chatId && o.actor === session.value.actor
+      );
+      await Promise.all(myMetadata.map(o => graffiti.delete(o, session.value)));
+      isDeleteModalOpen.value = false;
+      router.push("/explore");
+    }
+
     return {
       isMusicMode,
       predefinedGenres,
@@ -356,6 +404,9 @@ export default async () => ({
       isTogglingJoin,
       chatName,
       editChatName,
+      canDelete,
+      deleteChat,
+      isDeleteModalOpen,
     };
   }
 });

@@ -13,15 +13,26 @@
             </svg>
         </button>
     </div>
-    <button
-        type="button"
-        class="btn"
-        :class="isJoined ? 'btn-leave' : 'btn-join'"
-        @click="toggleJoin"
-        :disabled="isTogglingJoin"
-    >
-        {{ isTogglingJoin ? '...' : (isJoined ? 'Leave Chat' : 'Join Chat') }}
-    </button>
+    <div class="header-actions">
+        <button
+            v-if="canDelete"
+            type="button"
+            class="btn btn-leave"
+            @click="isDeleteModalOpen = true"
+            title="Delete chat"
+        >
+            Delete Chat
+        </button>
+        <button
+            type="button"
+            class="btn"
+            :class="isJoined ? 'btn-leave' : 'btn-join'"
+            @click="toggleJoin"
+            :disabled="isTogglingJoin"
+        >
+            {{ isTogglingJoin ? '...' : (isJoined ? 'Leave Chat' : 'Join Chat') }}
+        </button>
+    </div>
 </div>
 
 <div class="message-transcript">
@@ -161,6 +172,21 @@
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-primary" @click="isGenreModalOpen = false">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="isDeleteModalOpen" class="modal-overlay" @click.self="isDeleteModalOpen = false">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Delete Chat</h3>
+                <button type="button" class="btn-icon" @click="isDeleteModalOpen = false">&times;</button>
+            </div>
+            <p>Are you sure you want to delete this chat? This will remove it for everyone.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-primary" @click="isDeleteModalOpen = false">Cancel</button>
+                <button type="button" class="btn btn-leave" @click="deleteChat">Delete</button>
             </div>
         </div>
     </div>
