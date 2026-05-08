@@ -42,7 +42,7 @@ ul {
 }
 
 a.router-link-active {
-    color: black;
+    color: var(--ink);
     text-decoration: none;
 }
 
@@ -133,6 +133,11 @@ header {
     gap: 0.5rem;
     flex: 1;
     user-select: none;
+}
+
+.sidebar-create-btn {
+    font-size: 1.5rem;
+    line-height: 1;
 }
 
 .sidebar-toggle-icon {
@@ -367,10 +372,16 @@ header {
     flex: 1;
     overflow-y: auto;
     padding: 1rem;
-    gap: 0.65rem;
     scroll-behavior: smooth;
     display: flex;
     flex-direction: column;
+}
+
+.message-list ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    width: 100%;
 }
 
 .msg-text {
@@ -515,6 +526,16 @@ header {
     font-size: 0.9rem;
 }
 
+.composer-mimic {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.composer-mimic .genre-modal-list {
+    padding: 0;
+}
+
 .composer .text-input,
 .composer .btn-primary,
 .composer .btn-ghost {
@@ -522,6 +543,23 @@ header {
     padding-top: 0;
     padding-bottom: 0;
     box-sizing: border-box;
+}
+
+.composer-inputs {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.mode-toggle-container {
+    flex-shrink: 0;
+}
+
+.composer .btn-primary {
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .composer .text-input {
@@ -538,9 +576,9 @@ header {
 
 .input-container {
     position: relative;
-    flex: 1;
     display: flex;
     min-width: 0;
+    width: 100%;
 }
 
 .input-tip {
@@ -663,7 +701,7 @@ header {
     cursor: pointer;
 }
 
-.genre-option, select option {
+select option {
     text-transform: capitalize;
 }
 
@@ -736,6 +774,11 @@ header {
     font-size: 0.85rem;
     color: var(--brand-light);
     font-weight: 600;
+}
+
+.message-embed-iframe {
+    border-radius: 12px;
+    border: none;
 }
 
 /* Profile Page */
@@ -915,6 +958,15 @@ header {
     justify-content: flex-end;
     gap: 0.5rem;
     margin-top: 1.25rem;
+}
+
+.modal-content-padding {
+    padding: 0.5rem 0;
+}
+
+.input-full-width {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Login page animation */

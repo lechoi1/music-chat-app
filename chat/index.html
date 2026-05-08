@@ -51,17 +51,14 @@
         >
             No messages yet — say hi and start the chat.
         </div>
-        <ul
-            v-else
-            class="message-list"
-        >
+        <ul v-else>
             <chat-message
                 v-for="msg in sortedMessageObjects" 
                 :key="msg.url" 
                 :msg="msg"
                 :all-existing-genres="allExistingGenres"
                 />
-            <li ref="bottomMarker" style="list-style: none;"></li>
+            <li ref="bottomMarker"></li>
         </ul>
     </div>
 
@@ -76,20 +73,39 @@
             <span class="mode-label" :class="{ 'is-active': isMusicMode }">Music</span>
         </div>
 
-        <div class="input-container">
-            <div v-if="isMusicMode && isInputFocused" class="input-tip">
-                Share your thoughts on a "Song - Artist" in double quotes ...
+        <div class="composer-inputs">
+            <div class="input-container">
+                <div v-if="isMusicMode && isInputFocused" class="input-tip">
+                    Share your thoughts on a "Song - Artist" in double quotes ...
+                </div>
+                <input 
+                    type="text"
+                    class="text-input"
+                    v-model="message"
+                    @focus="isInputFocused = true"
+                    @blur="isInputFocused = false"
+                    :placeholder="isMusicMode ? 'Share your thoughts on a &quot;Song - Artist&quot; in double quotes ...' : 'Send a message...'"
+                    aria-label="Message text"
+                    :disabled="isSending"
+                />
             </div>
-            <input 
-                type="text"
-                class="text-input"
-                v-model="message"
-                @focus="isInputFocused = true"
-                @blur="isInputFocused = false"
-                :placeholder="isMusicMode ? 'Share your thoughts on a &quot;Song - Artist&quot; in double quotes ...' : 'Send a message...'"
-                aria-label="Message text"
-                :disabled="isSending"
-            />
+    
+            <!-- New input for optional music URL -->
+            <div v-if="isMusicMode" class="input-container music-url-input-wrapper">
+                <div v-if="isUrlInputFocused" class="input-tip">
+                    Optional: Spotify URL to embed
+                </div>
+                <input
+                    type="text"
+                    class="text-input"
+                    v-model="musicUrl"
+                    @focus="isUrlInputFocused = true"
+                    @blur="isUrlInputFocused = false"
+                    placeholder="Optional: Spotify URL to embed"
+                    aria-label="Music URL"
+                    :disabled="isSending"
+                />
+            </div>
         </div>
         
         <div class="genre-selection" v-show="isMusicMode">
@@ -205,11 +221,10 @@
                 <h3>Edit Chat Name</h3>
                 <button type="button" class="btn-icon" @click="isEditModalOpen = false">&times;</button>
             </div>
-            <div style="padding: 0.5rem 0;">
+            <div class="modal-content-padding">
                 <input 
                     v-model="editingChatName" 
-                    class="text-input" 
-                    style="width: 100%; box-sizing: border-box;" 
+                    class="text-input input-full-width" 
                     @keyup.enter="confirmEditChatName"
                     placeholder="Enter chat name..."
                 />

@@ -2,6 +2,21 @@ import { ref, computed } from "vue";
 import { useGraffiti, useGraffitiSession } from "@graffiti-garden/wrapper-vue";
 import { useProfile } from "../utils.js";
 
+const getEmbedHtml = (url) => {
+  if (!url) return null;
+
+  // Spotify
+  const spotifyMatch = url.match(/https:\/\/open\.spotify\.com\/(track|album|playlist|episode|show)\/([a-zA-Z0-9]+)/);
+  if (spotifyMatch) {
+    const [, type, id] = spotifyMatch;
+    return `<iframe class="message-embed-iframe" src="https://open.spotify.com/embed/${type}/${id}?utm_source=generator" 
+      width="100%" height="352" allowfullscreen="" 
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+  }
+
+  return null;
+};
+
 export default async () => ({
   props: ["msg", "allExistingGenres"],
   template: await fetch(new URL("./chatMessage.html", import.meta.url)).then((r) =>
@@ -15,8 +30,10 @@ export default async () => ({
     const isSaving = ref(false);
     const isEditing = ref(false);
     const isInputFocused = ref(false);
+    const isUrlInputFocused = ref(false);
 
     const editedContent = ref("");
+    const editedMusicUrl = ref("");
     const editedIsMusicMode = ref(false);
     const editedGenres = ref([]);
     
@@ -26,7 +43,8 @@ export default async () => ({
 
     function startEditing() {
       editedContent.value = props.msg.value.content;
-      editedIsMusicMode.value = !!(props.msg.value.genres && props.msg.value.genres.length > 0);
+      editedMusicUrl.value = props.msg.value.musicUrl || "";
+      editedIsMusicMode.value = !!(props.msg.value.genres?.length || props.msg.value.musicUrl);
       editedGenres.value = [...(props.msg.value.genres || [])];
       isEditing.value = true;
     }
@@ -41,6 +59,7 @@ export default async () => ({
             ...props.msg.value,
             content: editedContent.value,
             genres: editedIsMusicMode.value ? editedGenres.value : [],
+            musicUrl: editedIsMusicMode.value ? (editedMusicUrl.value.trim() || undefined) : undefined,
             activity: "Update",
             object: props.msg.value.object || props.msg.url,
             published: Date.now(),
@@ -53,6 +72,9 @@ export default async () => ({
         isSaving.value = false;
       }
     }
+
+    const embeddedContent = computed(() => getEmbedHtml(props.msg.value.musicUrl));
+
 
     const { profileName } = useProfile(() => props.msg.actor);
 
@@ -80,10 +102,13 @@ export default async () => ({
       isEditing,
       isSaving,
       editedContent,
+      editedMusicUrl,
       editedIsMusicMode,
       editedGenres,
       startEditing,
       saveEdit,
+      isUrlInputFocused,
+      embeddedContent,
       searchQuery,
       isInputFocused
     };

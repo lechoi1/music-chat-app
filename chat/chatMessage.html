@@ -11,8 +11,10 @@
             </span>
         </div>
 
-        <p class="msg-text">{{ msg.value.content }}</p>
+        <p class="msg-text" v-if="msg.value.content">{{ msg.value.content }}</p>
 
+        <div v-if="embeddedContent" class="message-embed" v-html="embeddedContent"></div>
+        
         <div v-if="msg.value.genres && msg.value.genres.length > 0" class="msg-genres">
             <span v-for="genre in msg.value.genres" :key="genre" class="genre-item">
                 {{ genre }}
@@ -20,7 +22,7 @@
         </div>
 
         <div class="msg-footer">
-            <div v-if="msg.value.genres && msg.value.genres.length > 0" class="msg-search-links">
+            <div v-if="!embeddedContent && msg.value.genres && msg.value.genres.length > 0" class="msg-search-links">
                 <a :href="'https://open.spotify.com/search/' + encodeURIComponent(searchQuery)" target="_blank">
                     🎵 Spotify
                 </a>
@@ -46,7 +48,7 @@
                 <button type="button" class="btn-icon" @click="isEditing = false">&times;</button>
             </div>
             
-            <div class="composer-mimic" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="composer-mimic">
                 <div class="mode-toggle-container">
                     <span class="mode-label" :class="{ 'is-active': !editedIsMusicMode }">Text</span>
                     <label class="ios-switch">
@@ -62,16 +64,29 @@
                     </div>
                     <input 
                         type="text"
-                        class="text-input"
+                        class="text-input input-full-width"
                         v-model="editedContent"
                         @focus="isInputFocused = true"
                         @blur="isInputFocused = false"
                         :placeholder="editedIsMusicMode ? 'Share your thoughts on a &quot;Song - Artist&quot; in double quotes ...' : 'Send a message...'"
-                        style="width: 100%; box-sizing: border-box;"
                     />
                 </div>
 
-                <div v-if="editedIsMusicMode" class="genre-modal-list" style="margin-top: 0.5rem;">
+                <div v-if="editedIsMusicMode" class="input-container music-url-input-wrapper">
+                    <div v-if="isUrlInputFocused" class="input-tip">
+                        Optional: Spotify URL to embed
+                    </div>
+                    <input 
+                        type="text"
+                        class="text-input input-full-width"
+                        v-model="editedMusicUrl"
+                        placeholder="Optional: Spotify URL to embed"
+                        @focus="isUrlInputFocused = true"
+                        @blur="isUrlInputFocused = false"
+                    />
+                </div>
+
+                <div v-if="editedIsMusicMode" class="genre-modal-list music-url-input-wrapper">
                     <label v-for="genre in allExistingGenres" :key="genre" class="genre-tag">
                         <input type="checkbox" :value="genre" v-model="editedGenres">
                         {{ genre }}

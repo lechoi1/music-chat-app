@@ -38,6 +38,7 @@ export default async () => ({
                 content: { type: "string" },
                 published: { type: "number" },
                 genres: { type: "array", items: { type: "string" } },
+                musicUrl: { type: "string" },
                 activity: { type: "string" },
                 created: { type: "number" },
                 object: { type: "string" },
@@ -141,6 +142,7 @@ export default async () => ({
               content: { type: "string" },
               published: { type: "number" },
               genres: { type: "array", items: { type: "string" } },
+              musicUrl: { type: "string" },
               activity: { type: "string" },
               created: { type: "number" },
               object: { type: "string" },
@@ -195,36 +197,36 @@ export default async () => ({
 
     // Message sending
     const message = ref("");
+    const musicUrl = ref("");
     const isSending = ref(false);
     const isInputFocused = ref(false);
+    const isUrlInputFocused = ref(false);
 
     async function sendMessage() {
       if (!message.value.trim() || !isJoined.value) return;
 
-      // Prepare genres: Combine, filter, and normalize
-      const rawGenres = [
+      const genres = [...new Set([
         ...selectedFromModal.value,
         ...customGenres.filter(g => g.checked && g.value.trim()).map(g => g.value.trim())
-      ];
-      const genres = rawGenres
-        .filter(Boolean)
-        .map(normalizeGenre);
+      ].filter(Boolean).map(normalizeGenre))];
 
       isSending.value = true;
       try {
         await graffiti.post(
           { 
             value: { 
-              content: message.value, 
-              published: Date.now(), 
-              genres: [...new Set(genres)]
+              content: message.value,
+              published: Date.now(),
+              genres: genres,
+              musicUrl: musicUrl.value.trim() || undefined, // Include musicUrl if provided
             }, 
             channels: [APP_CHANNEL, props.chatId, session.value.actor] 
           }, 
           session.value,
         );
         message.value = "";
-        resetGenreSelection(); // Reset genre selection after sending
+        musicUrl.value = "";
+        resetGenreSelection();
       } finally {
         isSending.value = false;
       }
@@ -423,7 +425,9 @@ export default async () => ({
       isEditModalOpen,
       editingChatName,
       confirmEditChatName,
-      isInputFocused
-    };
+      isInputFocused,
+      isUrlInputFocused,
+      musicUrl,
+    }; 
   }
 });
