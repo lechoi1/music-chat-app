@@ -87,7 +87,15 @@ export default async () => ({
     async function deleteMessage() {
       isDeleting.value = true;
       try {
-        await graffiti.delete(props.msg, session.value);
+        await graffiti.post({
+          value: {
+            ...props.msg.value,
+            activity: "Delete",
+            object: props.msg.value.object || props.msg.url,
+            published: Date.now()
+          },
+          channels: props.msg.channels
+        }, session.value);
       } finally {
         isDeleting.value = false;
       }

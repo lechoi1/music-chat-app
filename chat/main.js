@@ -52,7 +52,8 @@ export default async () => ({
 
     const sortedMessageObjects = computed(() => {
       const latest = getLatestBy(messageObjects.value, m => m.value.object || m.url);
-      return sortByPublished(Object.values(latest), false);
+      const filtered = Object.values(latest).filter(m => m.value.activity !== 'Delete');
+      return sortByPublished(filtered, false);
     });
 
     // Auto-scroll

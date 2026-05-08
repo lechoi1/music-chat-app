@@ -159,7 +159,9 @@ export default async () => ({
     // Combine chats with their latest messages for the UI
     const chats = computed(() => {
       const chatMap = getLatestBy(rawChats.value, (c) => c.value.channel);
-      const sortedMessages = sortByPublished(allMessages.value, true);
+      
+      const latestMessages = Object.values(getLatestBy(allMessages.value, m => m.value.object || m.url));
+      const sortedMessages = sortByPublished(latestMessages.filter(m => m.value.activity !== 'Delete'), true);
       
       // Group messages by channel
       const messagesByChannel = {};

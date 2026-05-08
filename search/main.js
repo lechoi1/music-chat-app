@@ -73,7 +73,10 @@ export default async () => ({
       const query = activeSearch.query.trim().toLowerCase();
       const genre = activeSearch.genre.toLowerCase();
 
-      return allMessages.value.filter(msg => {
+      const latestMessages = Object.values(getLatestBy(allMessages.value, m => m.value.object || m.url));
+
+      return latestMessages.filter(msg => {
+        if (msg.value.activity === 'Delete') return false;
         const matchesQuery = !query || msg.value.content.toLowerCase().includes(query);
         const matchesGenre = !genre || (msg.value.genres && msg.value.genres.some(g => g.toLowerCase() === genre));
         return matchesQuery && matchesGenre;
