@@ -37,6 +37,9 @@ export default async () => ({
                 content: { type: "string" },
                 published: { type: "number" },
                 genres: { type: "array", items: { type: "string" } },
+                activity: { type: "string" },
+                created: { type: "number" },
+                object: { type: "string" },
               },
             },
           },
@@ -46,7 +49,8 @@ export default async () => ({
       );
 
     const sortedMessageObjects = computed(() => {
-      return sortByPublished(messageObjects.value, false);
+      const latest = getLatestBy(messageObjects.value, m => m.value.object || m.url);
+      return sortByPublished(Object.values(latest), false);
     });
 
     // Auto-scroll
@@ -114,6 +118,9 @@ export default async () => ({
             properties: {
               genres: { type: "array", items: { type: "string" } },
               published: { type: "number" },
+              activity: { type: "string" },
+              created: { type: "number" },
+              object: { type: "string" },
             },
           },
         },
@@ -133,6 +140,9 @@ export default async () => ({
               content: { type: "string" },
               published: { type: "number" },
               genres: { type: "array", items: { type: "string" } },
+              activity: { type: "string" },
+              created: { type: "number" },
+              object: { type: "string" },
             },
           },
         },
@@ -142,7 +152,8 @@ export default async () => ({
     );
 
     const lastCustomGenre = computed(() => {
-      const sorted = sortByPublished(myMessages.value, true);
+      const latest = getLatestBy(myMessages.value, m => m.value.object || m.url);
+      const sorted = sortByPublished(Object.values(latest), true);
       for (const msg of sorted) {
         if (msg.value.genres && msg.value.genres.length > 0) {
           const custom = msg.value.genres.find(g => 
@@ -161,7 +172,8 @@ export default async () => ({
     });
 
     const allExistingGenres = computed(() => {
-      return getUniqueGenres(allAppMessages.value, predefinedGenres);
+      const latest = getLatestBy(allAppMessages.value, m => m.value.object || m.url);
+      return getUniqueGenres(Object.values(latest), predefinedGenres);
     });
 
     const addCustomGenreField = () => {

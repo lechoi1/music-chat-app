@@ -7,7 +7,7 @@
             </router-link>
             <span class="msg-date">
                 <slot name="context"></slot>
-                {{ new Date(msg.value.published).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                {{ new Date(msg.value.published).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) }} {{ new Date(msg.value.published).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
             </span>
         </div>
 
@@ -29,10 +29,60 @@
                 </a>
             </div>
             
-            <button v-if="isMine" @click="deleteMessage" :disabled="isDeleting" class="btn-delete">
+            <button v-if="isMine" @click="startEditing" :disabled="isSaving || isDeleting" class="btn-delete">
+                Edit
+            </button>
+            <button v-if="isMine" @click="deleteMessage" :disabled="isDeleting || isSaving" class="btn-delete">
                 {{ isDeleting ? '...' : 'Delete' }}
             </button>
         </div>
     </div>
-    
+
+    <!-- Edit Modal -->
+    <div v-if="isEditing" class="modal-overlay" @click.self="isEditing = false">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Edit Message</h3>
+                <button type="button" class="btn-icon" @click="isEditing = false">&times;</button>
+            </div>
+            
+            <div class="composer-mimic" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div class="mode-toggle-container">
+                    <span class="mode-label" :class="{ 'is-active': !editedIsMusicMode }">Text</span>
+                    <label class="ios-switch">
+                        <input type="checkbox" v-model="editedIsMusicMode">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="mode-label" :class="{ 'is-active': editedIsMusicMode }">Music</span>
+                </div>
+
+                <input 
+                    type="text"
+                    class="text-input"
+                    v-model="editedContent"
+                    :placeholder="editedIsMusicMode ? 'Share a song...' : 'Send a message...'"
+                    style="width: 100%; box-sizing: border-box;"
+                />
+
+                <div v-if="editedIsMusicMode" class="genre-modal-list" style="margin-top: 0.5rem;">
+                    <label v-for="genre in allExistingGenres" :key="genre" class="genre-tag">
+                        <input type="checkbox" :value="genre" v-model="editedGenres">
+                        {{ genre }}
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn" @click="isEditing = false">Cancel</button>
+                <button 
+                    type="button" 
+                    class="btn-primary" 
+                    @click="saveEdit" 
+                    :disabled="isSaving || !editedContent || (editedIsMusicMode && editedGenres.length === 0)"
+                >
+                    {{ isSaving ? 'Saving...' : 'Save' }}
+                </button>
+            </div>
+        </div>
+    </div>
 </li>

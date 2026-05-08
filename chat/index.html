@@ -48,6 +48,7 @@
                 v-for="msg in sortedMessageObjects" 
                 :key="msg.url" 
                 :msg="msg"
+                :all-existing-genres="allExistingGenres"
                 />
             <li ref="bottomMarker" style="list-style: none;"></li>
         </ul>

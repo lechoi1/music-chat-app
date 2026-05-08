@@ -3,18 +3,55 @@ import { useGraffiti, useGraffitiSession } from "@graffiti-garden/wrapper-vue";
 import { useProfile } from "../utils.js";
 
 export default async () => ({
-  props: ["msg"],
+  props: ["msg", "allExistingGenres"],
   template: await fetch(new URL("./chatMessage.html", import.meta.url)).then((r) =>
     r.text(),
   ),
   setup(props) {
     const graffiti = useGraffiti();
     const session = useGraffitiSession();
+
     const isDeleting = ref(false);
+    const isSaving = ref(false);
+    const isEditing = ref(false);
+
+    const editedContent = ref("");
+    const editedIsMusicMode = ref(false);
+    const editedGenres = ref([]);
     
     const isMine = computed(() => 
       props.msg.actor === session.value?.actor
     );
+
+    function startEditing() {
+      editedContent.value = props.msg.value.content;
+      editedIsMusicMode.value = !!(props.msg.value.genres && props.msg.value.genres.length > 0);
+      editedGenres.value = [...(props.msg.value.genres || [])];
+      isEditing.value = true;
+    }
+
+    async function saveEdit() {
+      isSaving.value = true;
+      try {
+        const originalTimestamp = props.msg.value.created || props.msg.value.published;
+
+        await graffiti.post({
+          value: {
+            ...props.msg.value,
+            content: editedContent.value,
+            genres: editedIsMusicMode.value ? editedGenres.value : [],
+            activity: "Update",
+            object: props.msg.value.object || props.msg.url,
+            published: Date.now(),
+            created: originalTimestamp
+          },
+          channels: props.msg.channels
+        }, session.value);
+        isEditing.value = false;
+      } finally {
+        isSaving.value = false;
+      }
+    }
 
     const { profileName } = useProfile(() => props.msg.actor);
 
@@ -27,6 +64,19 @@ export default async () => ({
       }
     }
 
-    return { isDeleting, deleteMessage, isMine, profileName, actor: props.msg.actor };
+    return { 
+      isDeleting, 
+      deleteMessage, 
+      isMine, 
+      profileName, 
+      actor: props.msg.actor,
+      isEditing,
+      isSaving,
+      editedContent,
+      editedIsMusicMode,
+      editedGenres,
+      startEditing,
+      saveEdit
+    };
   }
 });

@@ -10,9 +10,11 @@ export const normalizeGenre = (g) =>
 
 // Sort Graffiti objects by their timestamp
 export const sortByPublished = (objects, descending = true) => {
-  return [...objects].sort((a, b) => 
-    descending ? b.value.published - a.value.published : a.value.published - b.value.published
-  );
+  return [...objects].sort((a, b) => {
+    const timeA = a.value.created || a.value.published;
+    const timeB = b.value.created || b.value.published;
+    return descending ? timeB - timeA : timeA - timeB;
+  });
 };
 
 // Helper to group objects by a key and return the most recent one for each group
@@ -51,8 +53,10 @@ export function useProfile(actorGetter) {
   );
 
   const profileName = computed(() => {
-    const sorted = sortByPublished(profileObjects.value);
-    return sorted[0]?.value.name;
+    const actor = actorGetter();
+    const filtered = profileObjects.value.filter(obj => obj.actor === actor);
+    const sorted = sortByPublished(filtered);
+    return sorted[0]?.value.name || null;
   });
 
   return { profileName };
