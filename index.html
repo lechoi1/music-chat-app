@@ -53,7 +53,7 @@
                                 <span class="sidebar-toggle-icon">{{ isSidebarOpen ? '▼' : '▶' }}</span>
                                 Chats
                             </h2>
-                            <button v-if="isSidebarOpen" type="button" class="btn-icon" @click="isCreatingChatModalOpen = true" title="Create New Chat" style="font-size: 1.5rem;">
+                            <button v-if="isSidebarOpen" type="button" class="btn-icon sidebar-create-btn" @click="isCreatingChatModalOpen = true" title="Create New Chat">
                                 +
                             </button>
                         </div>
@@ -90,13 +90,21 @@
                                     placeholder="Enter chat name..."
                                 />
                                 <div class="modal-actions">
-                                    <button type="button" class="btn-ghost" @click="isCreatingChatModalOpen = false">Cancel</button>
-                                    <input
+                                    <router-link
+                                        to="/explore"
+                                        class="btn btn-ghost modal-explore-link"
+                                        @click="isCreatingChatModalOpen = false"
+                                    >
+                                        Explore chats
+                                    </router-link>
+                                    <button type="button" class="btn btn-ghost" @click="isCreatingChatModalOpen = false">Cancel</button>
+                                    <button
                                         type="submit"
-                                        class="btn-primary"
-                                        :value="isCreatingChat ? 'Creating...' : 'Create Chat'"
+                                        class="btn btn-join"
                                         :disabled="!chatTitle || isCreatingChat"
-                                    />
+                                    >
+                                        {{ isCreatingChat ? 'Creating...' : 'Create Chat' }}
+                                    </button>
                                 </div>
                             </form>
                         </div>

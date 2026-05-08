@@ -161,6 +161,8 @@ header {
 .btn-delete,
 .btn-ghost,
 .btn-primary,
+.btn-join,
+.btn-leave,
 .text-input {
     border-radius: 0.75rem;
     font: inherit;
@@ -168,7 +170,9 @@ header {
 
 .btn,
 .btn-primary,
-.btn-ghost {
+.btn-ghost,
+.btn-join,
+.btn-leave {
     padding: 0.55rem 1rem;
     border: var(--border-style-transparent);
     font-weight: 600;
@@ -190,7 +194,8 @@ header {
     cursor: not-allowed;
 }
 
-.btn-primary:focus-visible {
+.btn-primary:focus-visible,
+.btn-join:focus-visible {
     outline: var(--outline-style) var(--brand-light);
 }
 
@@ -958,6 +963,20 @@ select option {
     justify-content: flex-end;
     gap: 0.5rem;
     margin-top: 1.25rem;
+}
+
+.modal-explore-link {
+    margin-right: auto;
+}
+
+.modal .btn-ghost {
+    color: var(--ink);
+    border-color: var(--border);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.modal .btn-ghost:hover {
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .modal-content-padding {
