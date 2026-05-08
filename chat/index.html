@@ -190,4 +190,27 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Chat Name Modal -->
+    <div v-if="isEditModalOpen" class="modal-overlay" @click.self="isEditModalOpen = false">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Edit Chat Name</h3>
+                <button type="button" class="btn-icon" @click="isEditModalOpen = false">&times;</button>
+            </div>
+            <div style="padding: 0.5rem 0;">
+                <input 
+                    v-model="editingChatName" 
+                    class="text-input" 
+                    style="width: 100%; box-sizing: border-box;" 
+                    @keyup.enter="confirmEditChatName"
+                    placeholder="Enter chat name..."
+                />
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn" @click="isEditModalOpen = false">Cancel</button>
+                <button type="button" class="btn btn-primary" @click="confirmEditChatName">Save</button>
+            </div>
+        </div>
+    </div>
 </div>

@@ -240,11 +240,22 @@ export default async () => ({
       }
     }, { immediate: true });
 
-    async function editChatName() {
-      const newName = prompt("Enter new chat name:", chatName.value);
+    const isEditModalOpen = ref(false);
+    const editingChatName = ref("");
+
+    function editChatName() {
+      editingChatName.value = chatName.value || "";
+      isEditModalOpen.value = true;
+    }
+
+    async function confirmEditChatName() {
       const targetUrl = latestChatMetadata.value?.url;
+      const newName = editingChatName.value.trim();
       
-      if (!newName || !newName.trim() || newName.trim() === chatName.value || !targetUrl) return;
+      if (!newName || newName === chatName.value || !targetUrl) {
+        isEditModalOpen.value = false;
+        return;
+      }
 
       await graffiti.post({
         value: {
@@ -252,11 +263,12 @@ export default async () => ({
           object: targetUrl,
           type: "Chat",
           channel: props.chatId,
-          title: newName.trim(),
+          title: newName,
           published: Date.now()
         },
         channels: [APP_CHANNEL, session.value.actor]
       }, session.value);
+      isEditModalOpen.value = false;
     }
 
     // Membership
@@ -407,6 +419,9 @@ export default async () => ({
       canDelete,
       deleteChat,
       isDeleteModalOpen,
+      isEditModalOpen,
+      editingChatName,
+      confirmEditChatName,
     };
   }
 });

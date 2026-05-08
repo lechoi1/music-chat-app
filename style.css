@@ -110,6 +110,7 @@ header {
     border-right: var(--border-style);
     padding: 1rem;
     overflow-y: auto;
+    overflow-x: hidden;
     min-height: 0;
     min-width: 0;
     flex-shrink: 0;
@@ -300,6 +301,9 @@ header {
     background: var(--white);
     border: var(--border-style-transparent);
     color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .chat-item:hover {
@@ -333,6 +337,15 @@ header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.chat-header-info h2 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .message-transcript {
@@ -660,6 +673,11 @@ header {
     margin: 0 0 0.75rem 0;
     font-size: 1.25rem;
     font-weight: 700;
+    width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .chat-card-preview {
