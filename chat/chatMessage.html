@@ -21,10 +21,10 @@
 
         <div class="msg-footer">
             <div v-if="msg.value.genres && msg.value.genres.length > 0" class="msg-search-links">
-                <a :href="'https://open.spotify.com/search/' + encodeURIComponent(msg.value.content)" target="_blank">
+                <a :href="'https://open.spotify.com/search/' + encodeURIComponent(searchQuery)" target="_blank">
                     🎵 Spotify
                 </a>
-                <a :href="'https://www.youtube.com/results?search_query=' + encodeURIComponent(msg.value.content)" target="_blank">
+                <a :href="'https://www.youtube.com/results?search_query=' + encodeURIComponent(searchQuery)" target="_blank">
                     📺 YouTube
                 </a>
             </div>
@@ -56,13 +56,20 @@
                     <span class="mode-label" :class="{ 'is-active': editedIsMusicMode }">Music</span>
                 </div>
 
-                <input 
-                    type="text"
-                    class="text-input"
-                    v-model="editedContent"
-                    :placeholder="editedIsMusicMode ? 'Share a song...' : 'Send a message...'"
-                    style="width: 100%; box-sizing: border-box;"
-                />
+                <div class="input-container">
+                    <div v-if="editedIsMusicMode && isInputFocused" class="input-tip">
+                        Share your thoughts on a "Song - Artist" in double quotes ...
+                    </div>
+                    <input 
+                        type="text"
+                        class="text-input"
+                        v-model="editedContent"
+                        @focus="isInputFocused = true"
+                        @blur="isInputFocused = false"
+                        :placeholder="editedIsMusicMode ? 'Share your thoughts on a &quot;Song - Artist&quot; in double quotes ...' : 'Send a message...'"
+                        style="width: 100%; box-sizing: border-box;"
+                    />
+                </div>
 
                 <div v-if="editedIsMusicMode" class="genre-modal-list" style="margin-top: 0.5rem;">
                     <label v-for="genre in allExistingGenres" :key="genre" class="genre-tag">

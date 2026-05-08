@@ -76,14 +76,21 @@
             <span class="mode-label" :class="{ 'is-active': isMusicMode }">Music</span>
         </div>
 
-        <input 
-            type="text"
-            class="text-input"
-            v-model="message"
-            :placeholder="isMusicMode ? 'Share a song...' : 'Send a message...'"
-            aria-label="Message text"
-            :disabled="isSending"
-        />
+        <div class="input-container">
+            <div v-if="isMusicMode && isInputFocused" class="input-tip">
+                Share your thoughts on a "Song - Artist" in double quotes ...
+            </div>
+            <input 
+                type="text"
+                class="text-input"
+                v-model="message"
+                @focus="isInputFocused = true"
+                @blur="isInputFocused = false"
+                :placeholder="isMusicMode ? 'Share your thoughts on a &quot;Song - Artist&quot; in double quotes ...' : 'Send a message...'"
+                aria-label="Message text"
+                :disabled="isSending"
+            />
+        </div>
         
         <div class="genre-selection" v-show="isMusicMode">
             <button

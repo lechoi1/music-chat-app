@@ -536,6 +536,42 @@ header {
     justify-content: center;
 }
 
+.input-container {
+    position: relative;
+    flex: 1;
+    display: flex;
+    min-width: 0;
+}
+
+.input-tip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 0.75rem);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--brand);
+    color: var(--white);
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    width: max-content;
+    max-width: min(280px, 90vw);
+    line-height: 1.4;
+}
+
+.input-tip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 0.4rem solid transparent;
+    border-top-color: var(--brand);
+}
+
 .composer .btn-ghost {
     color: var(--ink);
     border-color: var(--border);
@@ -836,6 +872,10 @@ header {
     .header-actions .btn {
         width: 100%;
         text-align: center;
+    }
+
+    .input-tip {
+        display: block;
     }
 }
 

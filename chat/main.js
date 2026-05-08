@@ -196,6 +196,7 @@ export default async () => ({
     // Message sending
     const message = ref("");
     const isSending = ref(false);
+    const isInputFocused = ref(false);
 
     async function sendMessage() {
       if (!message.value.trim() || !isJoined.value) return;
@@ -422,6 +423,7 @@ export default async () => ({
       isEditModalOpen,
       editingChatName,
       confirmEditChatName,
+      isInputFocused
     };
   }
 });

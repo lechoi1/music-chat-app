@@ -14,6 +14,7 @@ export default async () => ({
     const isDeleting = ref(false);
     const isSaving = ref(false);
     const isEditing = ref(false);
+    const isInputFocused = ref(false);
 
     const editedContent = ref("");
     const editedIsMusicMode = ref(false);
@@ -55,6 +56,12 @@ export default async () => ({
 
     const { profileName } = useProfile(() => props.msg.actor);
 
+    const searchQuery = computed(() => {
+      const content = props.msg.value.content || "";
+      const match = content.match(/"([^"]+)"/);
+      return match ? match[1] : content;
+    });
+
     async function deleteMessage() {
       isDeleting.value = true;
       try {
@@ -76,7 +83,9 @@ export default async () => ({
       editedIsMusicMode,
       editedGenres,
       startEditing,
-      saveEdit
+      saveEdit,
+      searchQuery,
+      isInputFocused
     };
   }
 });
