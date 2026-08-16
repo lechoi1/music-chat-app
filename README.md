@@ -1,6 +1,11 @@
 # 🎵 Music Chatroom 🎵
 
 A web application built for chatting about and sharing music recommendations with other users.
+<p align="center">
+  <img width="400" height="286
+" alt="welcome" src="https://github.com/user-attachments/assets/abb7d1a9-153a-481f-99e0-ba3a6b87dddd" />
+  <img width="400" height="286" alt="chat" src="https://github.com/user-attachments/assets/27198770-2e36-468b-b3bb-060ad12418fe" />
+</p>
 
 ## Getting started
 1. Navigate to the deployment: [https://lechoi1.github.io/music-chat-app/#/](https://lechoi1.github.io/music-chat-app/#/)
